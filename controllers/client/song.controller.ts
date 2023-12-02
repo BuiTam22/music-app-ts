@@ -68,7 +68,7 @@ export const detail = async (req: Request, res: Response) => {
 
   song["isFavoriteSong"] = favoriteSong ? true : false;
   res.render("client/pages/songs/detail", {
-      pageTitle: "Chi tiết bài hát",
+      pageTitle: song.title,
       song: song,
       singer: singer,
       topic: topic

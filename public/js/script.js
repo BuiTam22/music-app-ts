@@ -1,6 +1,6 @@
 // APlayer
 const aplayer = document.querySelector("#aplayer");
-if(aplayer) {
+if (aplayer) {
   let dataSong = aplayer.getAttribute("data-song");
   dataSong = JSON.parse(dataSong);
 
@@ -31,13 +31,28 @@ if(aplayer) {
   ap.on('pause', function () {
     avatar.style.animationPlayState = "paused";
   });
+
+  ap.on('ended', function () {
+    const link = `/songs/listen/${dataSong._id}`;
+
+    const option = {
+      method: "PATCH"
+    }
+
+    fetch(link, option)
+      .then(res => res.json())
+      .then(data => {
+        const elementListenSpan = document.querySelector(".singer-detail .inner-listen span");
+        elementListenSpan.innerHTML = `${data.listen} lượt nghe`;
+      })
+  });
 }
 // End APlayer
 
 
 // Button Like
 const buttonLike = document.querySelector("[button-like]");
-if(buttonLike) {
+if (buttonLike) {
   buttonLike.addEventListener("click", () => {
     const idSong = buttonLike.getAttribute("button-like");
     const isActive = buttonLike.classList.contains("active");
@@ -53,7 +68,7 @@ if(buttonLike) {
     fetch(link, option)
       .then(res => res.json())
       .then(data => {
-        if(data.code == 200) {
+        if (data.code == 200) {
           const span = buttonLike.querySelector("span");
           span.innerHTML = `${data.like} thích`;
 
@@ -67,7 +82,7 @@ if(buttonLike) {
 
 // Button Favorite
 const listButtonFavorite = document.querySelectorAll("[button-favorite]");
-if(listButtonFavorite.length > 0) {
+if (listButtonFavorite.length > 0) {
   listButtonFavorite.forEach((buttonFavorite) => {
     buttonFavorite.addEventListener("click", () => {
       const idSong = buttonFavorite.getAttribute("button-favorite");
@@ -84,7 +99,7 @@ if(listButtonFavorite.length > 0) {
       fetch(link, option)
         .then(res => res.json())
         .then(data => {
-          if(data.code == 200) {
+          if (data.code == 200) {
             buttonFavorite.classList.toggle("active");
           }
         })
@@ -96,7 +111,7 @@ if(listButtonFavorite.length > 0) {
 
 // Search Suggest
 const boxSearch = document.querySelector(".box-search");
-if(boxSearch) {
+if (boxSearch) {
   const input = boxSearch.querySelector("input[name='keyword']");
   const boxSuggest = boxSearch.querySelector(".inner-suggest");
   let timeOut;
@@ -110,14 +125,14 @@ if(boxSearch) {
       console.log(test);
 
       fetch(link)
-      .then(res => res.json())
-      .then(data => {
-        const songs = data.songs;
-        if(songs.length > 0) {
-          boxSuggest.classList.add("show");
+        .then(res => res.json())
+        .then(data => {
+          const songs = data.songs;
+          if (songs.length > 0) {
+            boxSuggest.classList.add("show");
 
-          const htmls = songs.map(song => {
-            return `
+            const htmls = songs.map(song => {
+              return `
               <a class="inner-item" href="/songs/detail/${song.slug}">
                 <div class="inner-image"><img src="${song.avatar}" /></div>
                 <div class="inner-info">
@@ -126,17 +141,20 @@ if(boxSearch) {
                 </div>
               </a>
             `;
-          });
+            });
 
-          const boxList = boxSuggest.querySelector(".inner-list");
-          boxList.innerHTML = htmls.join("");
-        } else {
-          boxSuggest.classList.remove("show");
-        }
-      })
+            const boxList = boxSuggest.querySelector(".inner-list");
+            boxList.innerHTML = htmls.join("");
+          } else {
+            boxSuggest.classList.remove("show");
+          }
+        })
     }, 100);
   });
 }
 // End Search Suggest
+
+
+
 
 

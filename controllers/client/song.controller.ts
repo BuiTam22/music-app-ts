@@ -8,31 +8,31 @@ import FavoriteSong from "../../models/favorite-songs";
 export const list = async (req: Request, res: Response) => {
   try {
     const topic = await Topic.findOne({
-        slug: req.params.slugTopic,
+      slug: req.params.slugTopic,
+      status: "active",
+      deleted: false
+    });
+
+    const songs = await Song.find({
+      topicId: topic.id,
+      status: "active",
+      deleted: false
+    }).select("avatar title slug singerId like");
+
+    for (const song of songs) {
+      const infoSinger = await Singer.findOne({
+        _id: song.singerId,
         status: "active",
         deleted: false
       });
-    
-      const songs = await Song.find({
-        topicId: topic.id,
-        status: "active",
-        deleted: false
-      }).select("avatar title slug singerId like");
-    
-      for (const song of songs) {
-        const infoSinger = await Singer.findOne({
-          _id: song.singerId,
-          status: "active",
-          deleted: false
-        });
-    
-        song["infoSinger"] = infoSinger;
-      }
-    
-      res.render("client/pages/songs/list", {
-        pageTitle: topic.title,
-        songs: songs
-      });    
+
+      song["infoSinger"] = infoSinger;
+    }
+
+    res.render("client/pages/songs/list", {
+      pageTitle: topic.title,
+      songs: songs
+    });
   } catch (error) {
     res.redirect("back");
   }
@@ -42,7 +42,7 @@ export const list = async (req: Request, res: Response) => {
 // [GET] /songs/detail/:slugSong
 export const detail = async (req: Request, res: Response) => {
   const slugSong = req.params.slugSong;
-  
+
   const song = await Song.findOne({
     slug: slugSong,
     status: "active",
@@ -68,10 +68,10 @@ export const detail = async (req: Request, res: Response) => {
 
   song["isFavoriteSong"] = favoriteSong ? true : false;
   res.render("client/pages/songs/detail", {
-      pageTitle: song.title,
-      song: song,
-      singer: singer,
-      topic: topic
+    pageTitle: song.title,
+    song: song,
+    singer: singer,
+    topic: topic
   });
 };
 
@@ -114,7 +114,7 @@ export const favorite = async (req: Request, res: Response) => {
       const existFavoriteSong = await FavoriteSong.findOne({
         songId: idSong
       });
-      if(!existFavoriteSong) {
+      if (!existFavoriteSong) {
         const record = new FavoriteSong({
           // userId: "",
           songId: idSong
@@ -123,7 +123,7 @@ export const favorite = async (req: Request, res: Response) => {
       }
       break;
     case "unfavorite":
-      await FavoriteSong.deleteOne({songId: idSong});
+      await FavoriteSong.deleteOne({ songId: idSong });
       break;
     default:
       break;
@@ -132,4 +132,43 @@ export const favorite = async (req: Request, res: Response) => {
     code: 200,
     message: "Thành công"
   })
+}
+
+
+// [PATCH] /songs/listen/:idSong
+export const listen = async (req: Request, res: Response) => {
+  try {
+    const id: String = req.params.idSong;
+
+    const song = await Song.findOne({
+      _id: id,
+      status: "active",
+      deleted: false
+    });
+
+    const countListen: Number = song.listen + 1;
+
+    await Song.updateOne(
+      {
+        _id: id
+      },
+      {
+        listen: countListen
+      }
+    );
+
+    const songNew = await Song.findOne({ _id: id });
+
+    res.json({
+      code: 200,
+      message: "Thành công",
+      listen: songNew.listen
+    })
+  } catch (error) {
+    console.log(error);
+    res.json({
+      code: 400,
+      message: "Thất bại"
+    });
+  }
 }

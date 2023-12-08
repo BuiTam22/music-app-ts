@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import path from "path";
 import * as database from "./config/database";
-
+import methodOverride from "method-override";
 import adminRoutes from "./routes/admin/index.route";
 import clientRoutes from "./routes/client/index.route";
 import { systemConfig } from "./config/config";
@@ -15,6 +15,8 @@ const port: number | string = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(methodOverride("_method"));
 
 app.use(express.static("public"));
 app.set("views", "./views");

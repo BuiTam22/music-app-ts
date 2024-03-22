@@ -10,6 +10,7 @@ if (aplayer) {
   const ap = new APlayer({
     container: aplayer,
     lrcType: 1,
+    // fixed: true,
     audio: [
       {
         name: dataSong.title,
@@ -20,6 +21,7 @@ if (aplayer) {
       },
     ],
     autoplay: true,
+    theme: '#b7daff',
     volume: 0.8
   });
 
